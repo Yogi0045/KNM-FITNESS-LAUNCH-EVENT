@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-sm mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+  <h1 class="font-display text-2xl font-bold mb-8 text-center">Admin <span class="gold-text">Login</span></h1>
+
+  {% if error %}
+  <div class="bg-red-500/10 border border-red-500/40 text-red-400 text-sm rounded-lg px-4 py-3 mb-6">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/admin/login" class="space-y-5 bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8">
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Username</label>
+      <input type="text" name="username" required autofocus
+        class="w-full bg-black border border-white/20 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gold-500 transition">
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Password</label>
+      <input type="password" name="password" required
+        class="w-full bg-black border border-white/20 rounded-lg px-4 py-2.5 focus:outline-none focus:border-gold-500 transition">
+    </div>
+    <button type="submit" class="w-full gold-gradient text-black font-bold py-3 rounded-lg hover:scale-[1.02] transition transform">
+      Login
+    </button>
+  </form>
+</section>
+{% endblock %}

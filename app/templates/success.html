@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center">
+  <i class="bi bi-check-circle-fill text-gold-400 text-6xl mb-6"></i>
+  <h1 class="font-display text-2xl font-bold mb-2">Registration Successful!</h1>
+  <p class="text-gray-400 mb-8">Please save this QR code. You'll need it for check-in at the event.</p>
+
+  <div class="bg-white/5 border border-gold-500/30 rounded-2xl p-6 sm:p-8">
+    <p class="text-sm text-gray-400 mb-1">Registration ID</p>
+    <p class="font-display text-2xl font-bold gold-text mb-6">{{ participant.reg_id }}</p>
+
+    <div class="bg-white rounded-xl p-4 inline-block">
+      <img src="{{ participant.qr_path }}" alt="QR Code for {{ participant.reg_id }}" class="w-48 h-48 mx-auto">
+    </div>
+
+    <div class="text-left mt-8 space-y-2 text-sm text-gray-300">
+      <p><span class="text-gray-500">Name:</span> {{ participant.name }}</p>
+      <p><span class="text-gray-500">City:</span> {{ participant.city }}</p>
+      <p><span class="text-gray-500">Phone:</span> {{ participant.phone }}</p>
+      <p><span class="text-gray-500">Email:</span> {{ participant.email }}</p>
+    </div>
+  </div>
+
+  <a href="/" class="inline-block mt-8 text-gold-400 hover:underline">Back to Home</a>
+</section>
+{% endblock %}

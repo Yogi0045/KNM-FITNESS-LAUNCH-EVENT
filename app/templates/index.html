@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-b from-gold-500/10 via-black to-black"></div>
+
+  <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+    <p class="text-gold-400 font-semibold tracking-widest uppercase text-sm mb-4">
+      Grand Opening
+    </p>
+
+<h1 class="font-display text-4xl sm:text-6xl font-bold mb-6 leading-tight">
+  <span class="gold-text">{{ event_name }}</span>
+</h1>
+
+<p class="text-gray-300 max-w-2xl mx-auto text-base sm:text-lg mb-6">
+  {{ event_description }}
+</p>
+
+<!-- FREE MEMBERSHIP BANNER -->
+<div class="winner-glow mb-10">
+  🎉 WIN 1 YEAR FREE KNM FITNESS MEMBERSHIP 🎉
+</div>
+
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-12 text-sm">
+  <div class="flex items-center gap-2 bg-white/5 border border-gold-500/30 rounded-full px-5 py-2">
+    <i class="bi bi-calendar-event text-gold-400"></i> {{ event_date }}
+  </div>
+
+  <div class="flex items-center gap-2 bg-white/5 border border-gold-500/30 rounded-full px-5 py-2">
+    <i class="bi bi-geo-alt text-gold-400"></i> {{ event_location }}
+  </div>
+
+  <div class="flex items-center gap-2 bg-white/5 border border-gold-500/30 rounded-full px-5 py-2">
+    <i class="bi bi-instagram text-gold-400"></i>
+    <a href="https://instagram.com/knmfitness_" target="_blank" rel="noopener noreferrer" class="text-gray-200 hover:text-white">@knmfitness_</a>
+  </div>
+</div>
+</section>
+
+<!-- EVENT CHALLENGES -->
+
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+  <div class="text-center mb-10">
+    <h2 class="text-4xl font-bold gold-text mb-3">
+      Events
+    </h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+<div class="challenge-card"> 
+  <div class="text-5xl mb-4">📢</div> 
+  <h3 class="text-xl font-bold mb-2">Poster Launch</h3> 
+  <p class="text-gray-400 text-sm"> Official unveiling of KNM Fitness Anakapalle and its vision. </p>
+ </div>
+
+<div class="challenge-card">
+  <div class="text-5xl mb-4">🏋️</div>
+  <h3 class="text-xl font-bold mb-2">Deadlift Challenge</h3>
+  <p class="text-gray-400 text-sm">
+    Lift the heaviest weight and become the champion.
+  </p>
+</div>
+
+<div class="challenge-card">
+  <div class="text-5xl mb-4">💪</div>
+  <h3 class="text-xl font-bold mb-2">Push-Up Challenge</h3>
+  <p class="text-gray-400 text-sm">
+    Maximum push-ups in one attempt.
+  </p>
+</div>
+
+<div class="challenge-card">
+  <div class="text-5xl mb-4">🔥</div>
+  <h3 class="text-xl font-bold mb-2">Pull-Up Challenge</h3>
+  <p class="text-gray-400 text-sm">
+    Test your upper-body power and endurance.
+  </p>
+</div>
+ 
+
+<div class="challenge-card">
+  <div class="text-5xl mb-4">⏱️</div>
+  <h3 class="text-xl font-bold mb-2">Hanging Challenge</h3>
+  <p class="text-gray-400 text-sm">
+    Hold the longest and claim victory.
+  </p>
+</div>
+<div class="challenge-card"> 
+  <div class="text-5xl mb-4">📢</div> 
+  <h3 class="text-xl font-bold mb-2">Lucky Draw</h3> 
+  <p class="text-gray-400 text-sm"> For Registered Participants a Lucky Draw will be held at the event.And award a gift </p>
+ </div>
+
+  </div>
+</section>
+
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid sm:grid-cols-3 gap-6 text-center">
+  <div class="bg-white/5 border border-white/10 rounded-2xl p-8">
+    <i class="bi bi-lightning-charge-fill text-gold-400 text-3xl mb-4"></i>
+    <h3 class="font-display font-semibold text-lg mb-2"> Equipment</h3>
+    <p class="text-gray-400 text-sm">Premium machines and free weights for every fitness level.</p>
+  </div>
+
+  <div class="bg-white/5 border border-white/10 rounded-2xl p-8">
+    <i class="bi bi-person-arms-up text-gold-400 text-3xl mb-4"></i>
+    <h3 class="font-display font-semibold text-lg mb-2">Expert Trainers</h3>
+    <p class="text-gray-400 text-sm">Certified coaches guiding you to your goals.</p>
+  </div>
+
+  
+</section>
+
+<!-- ABOUT KNM FITNESS SECTION -->
+<section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+  <div class="bg-white/5 border border-gold-500/30 rounded-2xl p-10 sm:p-14">
+    <h2 class="text-3xl sm:text-4xl font-bold gold-text mb-4">About KNM Fitness</h2>
+    <p class="text-gray-300 text-base sm:text-lg mb-8 leading-relaxed">
+      Experience state-of-the-art fitness facilities and expert guidance at KNM Fitness in Gajuwaka,Sheelanagar Visakhapatnam. 
+      Join our community of fitness enthusiasts and transform your body and mind.
+    </p>
+    <a href="https://magicpin.in/Visakhapatnam/Gajuwaka/Fitness/Knm-Fitness/store/b05936/photos" target="_blank" rel="noopener noreferrer" 
+      class="inline-block gold-gradient text-black font-bold px-8 py-3 rounded-full text-lg hover:scale-105 transition transform">
+      View on MagicPin
+    </a>
+  </div>
+</section>
+
+{% endblock %}
+ 

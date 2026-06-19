@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ event_name }}{% endblock %}</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          gold: { 400: '#d4af37', 500: '#c9a227', 600: '#b8860b' },
+        },
+        fontFamily: {
+          display: ['Oswald', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="/static/css/custom.css">
+{% block extra_head %}{% endblock %}
+</head>
+<body class="bg-black text-white font-sans min-h-screen flex flex-col">
+
+<nav class="border-b border-gold-500/20 bg-black/95 backdrop-blur sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+    <a href="/" class="font-display font-bold text-lg tracking-wide">
+      KNM <span class="gold-text">FITNESS</span>
+    </a>
+    <div class="flex items-center gap-3 sm:gap-5 text-sm">
+      <a href="/" class="hidden sm:inline hover:text-gold-400 transition">Home</a>
+      <a href="/register" class="hidden sm:inline hover:text-gold-400 transition">Register</a>
+      {% if request.session.get('admin_username') %}
+        <a href="/admin/dashboard" class="hidden sm:inline hover:text-gold-400 transition">Dashboard</a>
+        <a href="/checkin" class="hidden sm:inline hover:text-gold-400 transition">Check-In</a>
+        <a href="/lucky-draw" class="hidden sm:inline hover:text-gold-400 transition">Lucky Draw</a>
+        <a href="/admin/logout" class="px-3 py-1.5 rounded-md border border-gold-500 text-gold-400 hover:bg-gold-500 hover:text-black transition">Logout</a>
+      {% else %}
+        <a href="/admin/login" class="px-3 py-1.5 rounded-md border border-gold-500 text-gold-400 hover:bg-gold-500 hover:text-black transition">Admin</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if request.session.get('admin_username') %}
+  <div class="sm:hidden flex items-center justify-around border-t border-white/10 text-xs py-2">
+    <a href="/admin/dashboard" class="hover:text-gold-400 transition">Dashboard</a>
+    <a href="/checkin" class="hover:text-gold-400 transition">Check-In</a>
+    <a href="/lucky-draw" class="hover:text-gold-400 transition">Lucky Draw</a>
+  </div>
+  {% endif %}
+</nav>
+
+<main class="flex-1">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="border-t border-gold-500/20 py-6 text-center text-xs text-gray-500">
+  &copy; 2026 {{ event_name }}. All rights reserved.
+</footer>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

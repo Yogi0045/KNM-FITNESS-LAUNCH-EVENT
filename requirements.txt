@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+gunicorn
+sqlalchemy
+psycopg2-binary
+jinja2
+python-multipart
+python-dotenv
+qrcode
+pillow
+pandas
+openpyxl
+fastapi-mail
+itsdangerous
+passlib
+bcrypt==4.0.1
