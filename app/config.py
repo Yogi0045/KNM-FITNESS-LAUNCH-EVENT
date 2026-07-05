@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     # --- Event details (shown on the public site) -----------------------
     EVENT_NAME: str = "KNM Fitness Anakapalle LAUNCH EVENT"
-    EVENT_DATE: str = "JULY 12, 2026 (SUNDAY)| 8:00 AM Onwards"
+    EVENT_DATE: str = "JULY 19, 2026 (SUNDAY)| 8:00 AM Onwards"
     EVENT_LOCATION: str = "KNM Fitness, Anakapalle, Andhra Pradesh"
     EVENT_DESCRIPTION: str = (
         "Join us for the grand launch of KNM Fitness Anakapalle! Experience "
