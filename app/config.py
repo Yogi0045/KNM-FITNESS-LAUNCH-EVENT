@@ -7,12 +7,17 @@ out-of-the-box for local development/demo purposes -- change them in
 production via a real .env file or real environment variables.
 """
 
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
     # --- Database -----------------------------------------------------
-    DATABASE_URL: str = "postgresql://postgres:yogendraadiyarapu@localhost:5432/knm_fitness"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
     # --- Security -------------------------------------------------------
     SECRET_KEY: str = "change-this-secret-key-in-production"

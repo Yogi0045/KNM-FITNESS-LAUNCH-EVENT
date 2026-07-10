@@ -1,61 +1,75 @@
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from dotenv import load_dotenv
 import os
 import logging
+import smtplib
+from email.message import EmailMessage
+from email.utils import formataddr
+from email.mime.base import MIMEBase
+from email import encoders
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-conf = ConnectionConfig(
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME", ""),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD", ""),
-    MAIL_FROM=os.getenv("MAIL_FROM", "noreply@knmfitness.com"),
-    MAIL_PORT=587,
-    MAIL_SERVER="smtp.gmail.com",
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True
-)
+
+def _get_smtp_config():
+    return {
+        "username": os.getenv("MAIL_USERNAME", ""),
+        "password": os.getenv("MAIL_PASSWORD", ""),
+        "from": os.getenv("MAIL_FROM", "noreply@knmfitness.com"),
+        "host": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+        "port": int(os.getenv("MAIL_PORT", "587")),
+    }
+
 
 async def send_registration_email(email, name, qr_path):
-    """Send registration email with QR code attachment.
-    
-    If email credentials are not configured, this function logs a warning
-    and completes gracefully without sending. This allows the app to work
-    in development/test mode without email setup.
+    """Send registration email with QR image attached using SMTP.
+
+    If SMTP credentials are not configured this logs a warning and returns
+    so registration can complete without blocking.
     """
-    # Check if email is configured
-    if not conf.MAIL_USERNAME or not conf.MAIL_PASSWORD:
+    cfg = _get_smtp_config()
+
+    if not cfg["username"] or not cfg["password"]:
         logger.warning(
-            f"Email credentials not configured. Skipping email to {email}. "
-            "Set MAIL_USERNAME and MAIL_PASSWORD environment variables to enable email."
+            f"Email credentials not configured. Skipping email to {email}."
         )
         return
-    
+
     try:
-        message = MessageSchema(
-            subject="KNM Fitness Registration Successful",
-            recipients=[email],
-            body=f"""
+        msg = EmailMessage()
+        msg["Subject"] = "KNM Fitness Registration Successful"
+        msg["From"] = formataddr(("KNM Fitness", cfg["from"]))
+        msg["To"] = email
+        body = f"""
 Hello {name},
 
 Your registration has been confirmed.
 
-Please find your QR code attached.
-
-Show this QR code during check-in.
+Please find your QR code attached. Show this QR code during check-in.
 
 Thank you,
 KNM Fitness
-""",
-            subtype="plain",
-            attachments=[qr_path]
-        )
+"""
+        msg.set_content(body)
 
-        fm = FastMail(conf)
-        await fm.send_message(message)
+        # Attach QR image
+        if qr_path and os.path.exists(qr_path):
+            with open(qr_path, "rb") as f:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(f.read())
+            encoders.encode_base64(part)
+            filename = os.path.basename(qr_path)
+            part.add_header("Content-Disposition", f"attachment; filename=\"{filename}\"")
+            msg.add_attachment(part.get_payload(decode=True), maintype="image", subtype="png", filename=filename)
+
+        # Connect and send
+        with smtplib.SMTP(cfg["host"], cfg["port"]) as server:
+            server.starttls()
+            server.login(cfg["username"], cfg["password"])
+            server.send_message(msg)
+
         logger.info(f"Registration email sent to {email}")
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
-        # Don't raise - allow registration to complete even if email fails
+        # Allow registration to succeed even if email sending fails
