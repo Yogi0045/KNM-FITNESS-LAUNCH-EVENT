@@ -7,17 +7,25 @@ from email.utils import formataddr
 from email.mime.base import MIMEBase
 from email import encoders
 
+
+class EmailDeliveryError(Exception):
+    pass
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 def _get_smtp_config():
+    password = os.getenv("MAIL_PASSWORD", "").strip()
+    if password and " " in password:
+        password = password.replace(" ", "")
+
     return {
-        "username": os.getenv("MAIL_USERNAME", ""),
-        "password": os.getenv("MAIL_PASSWORD", ""),
-        "from": os.getenv("MAIL_FROM", "noreply@knmfitness.com"),
-        "host": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+        "username": os.getenv("MAIL_USERNAME", "").strip(),
+        "password": password,
+        "from": os.getenv("MAIL_FROM", "noreply@knmfitness.com").strip(),
+        "host": os.getenv("MAIL_SERVER", "smtp.gmail.com").strip(),
         "port": int(os.getenv("MAIL_PORT", "587")),
     }
 
@@ -64,7 +72,7 @@ KNM Fitness
             msg.add_attachment(part.get_payload(decode=True), maintype="image", subtype="png", filename=filename)
 
         # Connect and send
-        with smtplib.SMTP(cfg["host"], cfg["port"]) as server:
+        with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
             server.starttls()
             server.login(cfg["username"], cfg["password"])
             server.send_message(msg)
@@ -72,4 +80,4 @@ KNM Fitness
         logger.info(f"Registration email sent to {email}")
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
-        # Allow registration to succeed even if email sending fails
+        raise EmailDeliveryError(str(e)) from e

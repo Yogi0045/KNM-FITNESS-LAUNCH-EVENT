@@ -29,8 +29,10 @@
 
     <div>
       <label class="block text-sm font-medium mb-1.5">City</label>
-      <input type="text" name="city" value="{{ form_data.get('city', '') }}" required
+      <select name="city" required
         class="w-full bg-black border {{ 'border-red-500' if errors.get('city') else 'border-white/20' }} rounded-lg px-4 py-2.5 focus:outline-none focus:border-gold-500 transition">
+        <option value="Anakapalle" {% if form_data.get('city', 'Anakapalle') == 'Anakapalle' %}selected{% endif %}>Anakapalle</option>
+      </select>
       {% if errors.get('city') %}<p class="text-red-400 text-xs mt-1">{{ errors['city'] }}</p>{% endif %}
     </div>
 

@@ -15,7 +15,7 @@ from app.models import Participant
 from app.schemas import ParticipantCreate
 from app.services.qr_service import generate_qr_code
 from app.utils.id_generator import generate_reg_id
-from app.utils.email_service import send_registration_email
+from app.utils.email_service import EmailDeliveryError, send_registration_email
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
@@ -139,11 +139,15 @@ async def register_submit(
     participant.qr_path = qr_web_path
     db.commit()
 
-    await send_registration_email(
-        participant.email,
-        participant.name,
-        qr_file_path
-    )
+    try:
+        await send_registration_email(
+            participant.email,
+            participant.name,
+            qr_file_path
+        )
+    except EmailDeliveryError:
+        # Keep registration successful even if email delivery fails.
+        pass
 
     _store_registration_success(request, participant)
     return RedirectResponse(url="/", status_code=303)

@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 
 from app.routes import public
-from app.utils import id_generator
+from app.utils import id_generator, email_service
 
 
 class DummyRequest:
@@ -45,6 +45,11 @@ class RegistrationSuccessFlowTests(unittest.TestCase):
 
     def test_calculate_next_reg_id_value_starts_at_one_when_empty(self):
         self.assertEqual(id_generator.calculate_next_reg_id_value(existing_count=0, max_reg_id=None, start_at=1), 1)
+
+    def test_sanitize_smtp_credentials_removes_whitespace(self):
+        config = email_service._get_smtp_config()
+        self.assertEqual(config["username"], config["username"].strip())
+        self.assertEqual(config["password"], config["password"].strip())
 
 
 if __name__ == "__main__":
