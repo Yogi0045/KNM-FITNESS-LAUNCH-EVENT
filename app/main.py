@@ -15,6 +15,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth import hash_password
@@ -47,7 +48,11 @@ def on_startup() -> None:
     # 1. Create tables
     Base.metadata.create_all(bind=engine)
 
-    # 2. Create the registration-ID sequence
+    # 2. Ensure the gender column exists for existing databases
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE participants ADD COLUMN IF NOT EXISTS gender VARCHAR(20) NOT NULL DEFAULT 'male'"))
+
+    # 3. Create the registration-ID sequence
     reg_id_seq.create(engine, checkfirst=True)
 
     # 3. Seed a default admin account if none exists

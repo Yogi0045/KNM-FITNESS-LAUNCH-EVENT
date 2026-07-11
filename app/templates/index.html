@@ -17,6 +17,22 @@
   {{ event_description }}
 </p>
 
+{% if registration_success %}
+<section class="max-w-3xl mx-auto mb-10">
+  <div class="bg-white/5 border border-gold-500/30 rounded-2xl p-6 sm:p-8 text-left">
+    <p class="text-gold-400 font-semibold uppercase tracking-widest text-sm mb-2">Registration Successful</p>
+    <h2 class="text-2xl font-bold mb-3">Thanks, {{ registration_success.name }}!</h2>
+    <p class="text-gray-400">{{ registration_success.message }}</p>
+    <p class="text-sm text-gray-500 mt-4">Registration ID: {{ registration_success.reg_id }}</p>
+    {% if registration_success.qr_path %}
+    <div class="mt-5 bg-white rounded-xl p-4 inline-block">
+      <img src="{{ registration_success.qr_path }}" alt="QR Code for {{ registration_success.reg_id }}" class="w-48 h-48 mx-auto">
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
 <!-- FREE MEMBERSHIP BANNER -->
 <div class="winner-glow mb-10">
   🎉 WIN 1 YEAR FREE KNM FITNESS MEMBERSHIP 🎉

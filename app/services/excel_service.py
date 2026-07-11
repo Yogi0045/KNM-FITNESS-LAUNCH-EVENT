@@ -26,6 +26,7 @@ def export_participants_to_excel(participants: List[Participant]) -> BytesIO:
                 "Age": p.age,
                 "Weight (kg)": p.weight,
                 "City": p.city,
+                "Gender": p.gender.title() if p.gender else "",
                 "Phone": p.phone,
                 "Email": p.email,
                 "Registration ID": p.reg_id,

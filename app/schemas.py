@@ -16,14 +16,23 @@ class ParticipantCreate(BaseModel):
     age: int = Field(..., ge=10, le=100)
     weight: float = Field(..., gt=0, le=400)
     city: str = Field(..., min_length=2, max_length=100)
+    gender: str = Field(..., min_length=4, max_length=20)
     phone: str = Field(..., min_length=7, max_length=20)
     email: EmailStr
     instagram_followed: bool = Field(...)
 
-    @field_validator("name", "city")
+    @field_validator("name", "city", "gender")
     @classmethod
     def strip_text(cls, v: str) -> str:
         return v.strip()
+
+    @field_validator("gender")
+    @classmethod
+    def validate_gender(cls, v: str) -> str:
+        normalized = v.strip().lower()
+        if normalized not in {"male", "female"}:
+            raise ValueError("Gender must be either male or female")
+        return normalized
 
     @field_validator("phone")
     @classmethod

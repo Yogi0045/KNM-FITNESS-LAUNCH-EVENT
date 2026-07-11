@@ -23,38 +23,73 @@
     </div>
   </div>
 
-  <h2 class="font-display text-xl font-semibold mb-4">Recent Registrations</h2>
-  <div class="overflow-x-auto bg-white/5 border border-white/10 rounded-2xl">
-    <table class="w-full text-sm">
-      <thead>
-        <tr class="border-b border-white/10 text-left text-gray-400">
-          <th class="px-5 py-3">Reg ID</th>
-          <th class="px-5 py-3">Name</th>
-          <th class="px-5 py-3">City</th>
-          <th class="px-5 py-3">Phone</th>
-          <th class="px-5 py-3">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in recent %}
-        <tr class="border-b border-white/5">
-          <td class="px-5 py-3 font-mono text-gold-400">{{ p.reg_id }}</td>
-          <td class="px-5 py-3">{{ p.name }}</td>
-          <td class="px-5 py-3">{{ p.city }}</td>
-          <td class="px-5 py-3">{{ p.phone }}</td>
-          <td class="px-5 py-3">
-            {% if p.checked_in %}
-              <span class="text-green-400">Checked In</span>
+  <div class="grid md:grid-cols-2 gap-6 mb-10">
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <p class="text-gray-400 text-sm mb-1">Men Registrations</p>
+      <p class="font-display text-3xl font-bold">{{ men }}</p>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <p class="text-gray-400 text-sm mb-1">Women Registrations</p>
+      <p class="font-display text-3xl font-bold">{{ women }}</p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div>
+      <h2 class="font-display text-xl font-semibold mb-4">Recent Men Registrations</h2>
+      <div class="overflow-x-auto bg-white/5 border border-white/10 rounded-2xl">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-white/10 text-left text-gray-400">
+              <th class="px-5 py-3">Reg ID</th>
+              <th class="px-5 py-3">Name</th>
+              <th class="px-5 py-3">City</th>
+              <th class="px-5 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in recent_men %}
+            <tr class="border-b border-white/5">
+              <td class="px-5 py-3 font-mono text-gold-400">{{ p.reg_id }}</td>
+              <td class="px-5 py-3">{{ p.name }}</td>
+              <td class="px-5 py-3">{{ p.city }}</td>
+              <td class="px-5 py-3">{% if p.checked_in %}<span class="text-green-400">Checked In</span>{% else %}<span class="text-gray-500">Pending</span>{% endif %}</td>
+            </tr>
             {% else %}
-              <span class="text-gray-500">Pending</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" class="px-5 py-8 text-center text-gray-500">No registrations yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500">No men registrations yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold mb-4">Recent Women Registrations</h2>
+      <div class="overflow-x-auto bg-white/5 border border-white/10 rounded-2xl">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-white/10 text-left text-gray-400">
+              <th class="px-5 py-3">Reg ID</th>
+              <th class="px-5 py-3">Name</th>
+              <th class="px-5 py-3">City</th>
+              <th class="px-5 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in recent_women %}
+            <tr class="border-b border-white/5">
+              <td class="px-5 py-3 font-mono text-gold-400">{{ p.reg_id }}</td>
+              <td class="px-5 py-3">{{ p.name }}</td>
+              <td class="px-5 py-3">{{ p.city }}</td>
+              <td class="px-5 py-3">{% if p.checked_in %}<span class="text-green-400">Checked In</span>{% else %}<span class="text-gray-500">Pending</span>{% endif %}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500">No women registrations yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

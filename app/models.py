@@ -32,6 +32,7 @@ class Participant(Base):
     age = Column(Integer, nullable=False)
     weight = Column(Float, nullable=False)
     city = Column(String(100), nullable=False)
+    gender = Column(String(20), nullable=False, default="male")
     phone = Column(String(20), unique=True, nullable=False, index=True)
     email = Column(String(150), unique=True, nullable=False, index=True)
 

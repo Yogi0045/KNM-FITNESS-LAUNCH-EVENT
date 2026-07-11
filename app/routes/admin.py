@@ -64,6 +64,10 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     checked_in = db.query(Participant).filter(Participant.checked_in == True).count()  # noqa: E712
     pending = total - checked_in
     recent = db.query(Participant).order_by(Participant.created_at.desc()).limit(10).all()
+    men = db.query(Participant).filter(Participant.gender == "male").count()
+    women = db.query(Participant).filter(Participant.gender == "female").count()
+    recent_men = db.query(Participant).filter(Participant.gender == "male").order_by(Participant.created_at.desc()).limit(10).all()
+    recent_women = db.query(Participant).filter(Participant.gender == "female").order_by(Participant.created_at.desc()).limit(10).all()
 
     return templates.TemplateResponse(
         request,
@@ -74,6 +78,10 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "checked_in": checked_in,
             "pending": pending,
             "recent": recent,
+            "men": men,
+            "women": women,
+            "recent_men": recent_men,
+            "recent_women": recent_women,
         },
     )
 

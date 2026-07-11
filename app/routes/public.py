@@ -30,9 +30,32 @@ def _event_context(request: Request) -> dict:
     }
 
 
+def _store_registration_success(request: Request, participant: Participant | dict) -> None:
+    if isinstance(participant, dict):
+        payload = participant
+    else:
+        payload = {
+            "reg_id": participant.reg_id,
+            "name": participant.name,
+            "message": "Your QR code has been sent to your email address.",
+            "qr_path": participant.qr_path,
+        }
+
+    request.session["registration_success"] = payload
+
+
+def _consume_registration_success(request: Request) -> dict | None:
+    success_data = request.session.pop("registration_success", None)
+    if isinstance(success_data, dict):
+        return success_data
+    return None
+
+
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse(request, "index.html", _event_context(request))
+    context = _event_context(request)
+    context["registration_success"] = _consume_registration_success(request)
+    return templates.TemplateResponse(request, "index.html", context)
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -50,6 +73,7 @@ async def register_submit(
     age: int = Form(...),
     weight: float = Form(...),
     city: str = Form(...),
+    gender: str = Form(...),
     phone: str = Form(...),
     email: str = Form(...),
     instagram_followed: bool = Form(...),
@@ -60,6 +84,7 @@ async def register_submit(
         "age": age,
         "weight": weight,
         "city": city,
+        "gender": gender,
         "phone": phone,
         "email": email,
         "instagram_followed": instagram_followed,
@@ -101,6 +126,7 @@ async def register_submit(
         age=validated.age,
         weight=validated.weight,
         city=validated.city,
+        gender=validated.gender,
         phone=validated.phone,
         email=validated.email,
     )
@@ -119,7 +145,8 @@ async def register_submit(
         qr_file_path
     )
 
-    return RedirectResponse(url=f"/success/{reg_id}", status_code=303)
+    _store_registration_success(request, participant)
+    return RedirectResponse(url="/", status_code=303)
 
 
 @router.get("/success/{reg_id}", response_class=HTMLResponse)
