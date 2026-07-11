@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 import os
 import logging
 import smtplib
+import urllib.request
+import urllib.parse
 from email.message import EmailMessage
 from email.utils import formataddr
 from email.mime.base import MIMEBase
@@ -21,16 +23,47 @@ def _get_smtp_config():
     if password and " " in password:
         password = password.replace(" ", "")
 
+    host = os.getenv("MAIL_SERVER", "smtp.resend.com").strip()
+    username = os.getenv("MAIL_USERNAME", "").strip()
+
+    if host.lower().endswith("resend.com"):
+        if not username or "@" in username:
+            username = "resend"
+
     return {
-        "username": os.getenv("MAIL_USERNAME", "").strip(),
+        "username": username,
         "password": password,
-        "from": os.getenv("MAIL_FROM", "noreply@knmfitness.com").strip(),
-        "host": os.getenv("MAIL_SERVER", "smtp.gmail.com").strip(),
+        "from": os.getenv("MAIL_FROM", "onboarding@yourdomain.com").strip(),
+        "host": host,
         "port": int(os.getenv("MAIL_PORT", "587")),
     }
 
 
-async def send_registration_email(email, name, qr_path):
+def _get_sms_config():
+    return {
+        "enabled": os.getenv("SMS_ENABLED", "false").strip().lower() == "true",
+        "gateway_url": os.getenv("SMS_GATEWAY_URL", "").strip(),
+        "phone_number": os.getenv("SMS_PHONE_NUMBER", "").strip(),
+        "api_key": os.getenv("SMS_API_KEY", "").strip(),
+    }
+
+
+def _send_sms_notification(message: str, phone_number: str | None = None) -> None:
+    cfg = _get_sms_config()
+    if not cfg["enabled"]:
+        return
+
+    target_phone = phone_number or cfg["phone_number"]
+    if not target_phone or not cfg["gateway_url"]:
+        return
+
+    payload = urllib.parse.urlencode({"to": target_phone, "message": message, "api_key": cfg["api_key"]}).encode("utf-8")
+    req = urllib.request.Request(cfg["gateway_url"], data=payload, method="POST")
+    with urllib.request.urlopen(req, timeout=15) as response:
+        response.read()
+
+
+async def send_registration_email(email, name, qr_path, phone_number: str | None = None):
     """Send registration email with QR image attached using SMTP.
 
     If SMTP credentials are not configured this logs a warning and returns
@@ -42,6 +75,11 @@ async def send_registration_email(email, name, qr_path):
         logger.warning(
             f"Email credentials not configured. Skipping email to {email}."
         )
+        if phone_number:
+            _send_sms_notification(
+                f"KNM registration successful for {name}. QR details will be sent by email when configured.",
+                phone_number,
+            )
         return
 
     try:
@@ -81,3 +119,7 @@ KNM Fitness
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
         raise EmailDeliveryError(str(e)) from e
+    finally:
+        if phone_number:
+            sms_message = f"KNM registration successful for {name}. QR sent to email: {email}."
+            _send_sms_notification(sms_message, phone_number)

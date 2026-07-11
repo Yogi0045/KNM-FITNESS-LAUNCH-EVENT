@@ -143,7 +143,8 @@ async def register_submit(
         await send_registration_email(
             participant.email,
             participant.name,
-            qr_file_path
+            qr_file_path,
+            phone_number=participant.phone,
         )
     except EmailDeliveryError:
         # Keep registration successful even if email delivery fails.
