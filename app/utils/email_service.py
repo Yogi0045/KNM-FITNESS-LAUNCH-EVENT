@@ -111,11 +111,12 @@ KNM Fitness
 
         # Connect and send
         with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
-            server.starttls()
-            server.login(cfg["username"], cfg["password"])
-            server.send_message(msg)
-
-        logger.info(f"Registration email sent to {email}")
+           server.ehlo()
+           server.starttls()
+           server.ehlo()
+           server.login(cfg["username"], cfg["password"])
+           server.send_message(msg)
+           logger.info(f"Registration email sent to {email}")
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
         raise EmailDeliveryError(str(e)) from e
