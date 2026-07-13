@@ -5,9 +5,7 @@ import smtplib
 import urllib.request
 import urllib.parse
 from email.message import EmailMessage
-from email.utils import formataddr
-from email.mime.base import MIMEBase
-from email import encoders
+import resend
 
 
 class EmailDeliveryError(Exception):
@@ -70,8 +68,10 @@ def send_registration_email(email, name, qr_path, phone_number: str | None = Non
     so registration can complete without blocking.
     """
     cfg = _get_smtp_config()
+    resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
+    sender = cfg["from"] or cfg["username"]
 
-    if not cfg["username"] or not cfg["password"]:
+    if not resend_api_key and (not cfg["username"] or not cfg["password"]):
         logger.warning(
             f"Email credentials not configured. Skipping email to {email}."
         )
@@ -83,10 +83,6 @@ def send_registration_email(email, name, qr_path, phone_number: str | None = Non
         return
 
     try:
-        msg = EmailMessage()
-        msg["Subject"] = "KNM Fitness Registration Successful"
-        msg["From"] = formataddr(("KNM Fitness", cfg["from"]))
-        msg["To"] = email
         body = f"""
 Hello {name},
 
@@ -97,34 +93,56 @@ Please find your QR code attached. Show this QR code during check-in.
 Thank you,
 KNM Fitness
 """
-        msg.set_content(body)
 
-        # Attach QR image
+        attachment_data = None
         if qr_path and os.path.exists(qr_path):
             with open(qr_path, "rb") as f:
-                part = MIMEBase("application", "octet-stream")
-                part.set_payload(f.read())
-            encoders.encode_base64(part)
-            filename = os.path.basename(qr_path)
-            part.add_header("Content-Disposition", f"attachment; filename=\"{filename}\"")
-            msg.add_attachment(part.get_payload(decode=True), maintype="image", subtype="png", filename=filename)
+                qr_bytes = f.read()
+            attachment_data = {
+                "content": list(qr_bytes),
+                "filename": os.path.basename(qr_path),
+            }
 
-        # Connect and send. Use SMTP_SSL for port 465, otherwise STARTTLS.
-        if cfg["port"] == 465:
-            logger.debug("Using SMTP_SSL on port 465")
-            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=20) as server:
-                server.login(cfg["username"], cfg["password"])
-                server.send_message(msg)
-                logger.info(f"Registration email sent to {email} via SSL")
+        if resend_api_key:
+            logger.debug("Sending registration email through Resend API")
+            os.environ["RESEND_API_KEY"] = resend_api_key
+            params = resend.Emails.SendParams(
+                from_=sender,
+                to=email,
+                subject="KNM Fitness Registration Successful",
+                text=body,
+            )
+            if attachment_data:
+                params["attachments"] = [attachment_data]
+            response = resend.Emails.send(params)
+            response_id = getattr(response, "id", None) or response.get("id", "unknown") if hasattr(response, "get") else "unknown"
+            logger.info("Registration email sent to %s via Resend: %s", email, response_id)
         else:
-            logger.debug("Using STARTTLS on port %s", cfg["port"])
-            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-                server.login(cfg["username"], cfg["password"])
-                server.send_message(msg)
-                logger.info(f"Registration email sent to {email} via STARTTLS")
+            logger.debug("Resend API key not configured; using SMTP fallback")
+            msg = EmailMessage()
+            msg["Subject"] = "KNM Fitness Registration Successful"
+            msg["From"] = sender
+            msg["To"] = email
+            msg.set_content(body)
+
+            if attachment_data:
+                msg.add_attachment(bytes(attachment_data["content"]), maintype="image", subtype="png", filename=attachment_data["filename"])
+
+            if cfg["port"] == 465:
+                logger.debug("Using SMTP_SSL on port 465")
+                with smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=20) as server:
+                    server.login(cfg["username"], cfg["password"])
+                    server.send_message(msg)
+                    logger.info(f"Registration email sent to {email} via SSL")
+            else:
+                logger.debug("Using STARTTLS on port %s", cfg["port"])
+                with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
+                    server.ehlo()
+                    server.starttls()
+                    server.ehlo()
+                    server.login(cfg["username"], cfg["password"])
+                    server.send_message(msg)
+                    logger.info(f"Registration email sent to {email} via STARTTLS")
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
         raise EmailDeliveryError(str(e)) from e
