@@ -6,6 +6,7 @@ import urllib.request
 import urllib.parse
 from email.message import EmailMessage
 import resend
+import base64
 
 
 class EmailDeliveryError(Exception):
@@ -70,6 +71,7 @@ def send_registration_email(email, name, qr_path, phone_number: str | None = Non
     cfg = _get_smtp_config()
     resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
     sender = cfg["from"] or cfg["username"]
+    
 
     if not resend_api_key and (not cfg["username"] or not cfg["password"]):
         logger.warning(
@@ -93,27 +95,27 @@ Please find your QR code attached. Show this QR code during check-in.
 Thank you,
 KNM Fitness
 """
-
+      
         attachment_data = None
         if qr_path and os.path.exists(qr_path):
             with open(qr_path, "rb") as f:
                 qr_bytes = f.read()
             attachment_data = {
-                "content": list(qr_bytes),
-                "filename": os.path.basename(qr_path),
+             "filename": os.path.basename(qr_path),
+              "content": base64.b64encode(qr_bytes).decode("utf-8"),
             }
 
         if resend_api_key:
             logger.debug("Sending registration email through Resend API")
             os.environ["RESEND_API_KEY"] = resend_api_key
-            params = resend.Emails.SendParams(
-                from_=sender,
-                to=email,
-                subject="KNM Fitness Registration Successful",
-                text=body,
-            )
+            params = {
+            "from": sender,
+            "to": [email],
+            "subject": "KNM Fitness Registration Successful",
+            "text": body,
+     }
             if attachment_data:
-                params["attachments"] = [attachment_data]
+                 params["attachments"] = [attachment_data]
             response = resend.Emails.send(params)
             response_id = getattr(response, "id", None) or response.get("id", "unknown") if hasattr(response, "get") else "unknown"
             logger.info("Registration email sent to %s via Resend: %s", email, response_id)
