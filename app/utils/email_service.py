@@ -23,7 +23,7 @@ def _get_smtp_config():
     if password and " " in password:
         password = password.replace(" ", "")
 
-    host = os.getenv("MAIL_SERVER", "smtp.resend.com").strip()
+    host = os.getenv("MAIL_SERVER", "smtp.gmail.com").strip()
     username = os.getenv("MAIL_USERNAME", "").strip()
 
     if host.lower().endswith("resend.com"):
@@ -63,7 +63,7 @@ def _send_sms_notification(message: str, phone_number: str | None = None) -> Non
         response.read()
 
 
-async def send_registration_email(email, name, qr_path, phone_number: str | None = None):
+def send_registration_email(email, name, qr_path, phone_number: str | None = None):
     """Send registration email with QR image attached using SMTP.
 
     If SMTP credentials are not configured this logs a warning and returns
@@ -109,14 +109,22 @@ KNM Fitness
             part.add_header("Content-Disposition", f"attachment; filename=\"{filename}\"")
             msg.add_attachment(part.get_payload(decode=True), maintype="image", subtype="png", filename=filename)
 
-        # Connect and send
-        with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
-           server.ehlo()
-           server.starttls()
-           server.ehlo()
-           server.login(cfg["username"], cfg["password"])
-           server.send_message(msg)
-           logger.info(f"Registration email sent to {email}")
+        # Connect and send. Use SMTP_SSL for port 465, otherwise STARTTLS.
+        if cfg["port"] == 465:
+            logger.debug("Using SMTP_SSL on port 465")
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=20) as server:
+                server.login(cfg["username"], cfg["password"])
+                server.send_message(msg)
+                logger.info(f"Registration email sent to {email} via SSL")
+        else:
+            logger.debug("Using STARTTLS on port %s", cfg["port"])
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=20) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(cfg["username"], cfg["password"])
+                server.send_message(msg)
+                logger.info(f"Registration email sent to {email} via STARTTLS")
     except Exception as e:
         logger.error(f"Failed to send registration email to {email}: {e}")
         raise EmailDeliveryError(str(e)) from e

@@ -139,15 +139,19 @@ async def register_submit(
     participant.qr_path = qr_web_path
     db.commit()
 
+    # Send email in background so registration returns quickly (threaded).
     try:
-        await send_registration_email(
+        import asyncio
+
+        asyncio.create_task(asyncio.to_thread(
+            send_registration_email,
             participant.email,
             participant.name,
             qr_file_path,
-            phone_number=participant.phone,
-        )
-    except EmailDeliveryError:
-        # Keep registration successful even if email delivery fails.
+            participant.phone,
+        ))
+    except Exception:
+        # Scheduling the background task shouldn't block registration.
         pass
 
     _store_registration_success(request, participant)
