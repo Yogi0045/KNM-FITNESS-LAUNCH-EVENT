@@ -21,6 +21,22 @@
     </div>
   </div>
 
-  <a href="/" class="inline-block mt-8 text-gold-400 hover:underline">Back to Home</a>
+  <a href="/qr-pass/{{ participant.reg_id }}"
+   id="download-again-btn"
+   class="inline-block mt-8 mr-4 bg-gold-500 text-black font-semibold px-6 py-3 rounded-xl hover:bg-gold-400 transition">
+   Download Again
+</a>
+<a href="/" class="inline-block mt-8 text-gold-400 hover:underline">Back to Home</a>
+
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    const link = document.createElement("a");
+    link.href = "/qr-pass/{{ participant.reg_id }}";
+    link.download = "{{ participant.reg_id }}_QR_Pass.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+</script>
 </section>
 {% endblock %}

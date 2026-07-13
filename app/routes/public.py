@@ -2,12 +2,14 @@
 Public-facing routes: landing page, registration form, success page.
 No authentication required -- this is the part the general public uses.
 """
-
+import os
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from app.utils.qr_pass_generator import generate_qr_pass
+from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.database import get_db
@@ -140,23 +142,12 @@ async def register_submit(
     db.commit()
 
     # Send email in background so registration returns quickly (threaded).
-    try:
-        import asyncio
-
-        asyncio.create_task(asyncio.to_thread(
-            send_registration_email,
-            participant.email,
-            participant.name,
-            qr_file_path,
-            participant.phone,
-        ))
-    except Exception:
-        # Scheduling the background task shouldn't block registration.
-        pass
-
-    _store_registration_success(request, participant)
-    return RedirectResponse(url="/", status_code=303)
-
+    generate_qr_pass(
+        reg_id=participant.reg_id,
+        name=participant.name,
+        qr_file_path=qr_file_path,
+    )
+    return RedirectResponse(url=f"/success/{participant.reg_id}", status_code=303)
 
 @router.get("/success/{reg_id}", response_class=HTMLResponse)
 def success_page(request: Request, reg_id: str, db: Session = Depends(get_db)):
@@ -167,3 +158,13 @@ def success_page(request: Request, reg_id: str, db: Session = Depends(get_db)):
     context = _event_context(request)
     context["participant"] = participant
     return templates.TemplateResponse(request, "success.html", context)
+@router.get("/qr-pass/{reg_id}")
+def download_qr_pass(reg_id: str):
+    pass_path = f"app/static/passes/{reg_id}_QR_Pass.png"
+    if not os.path.exists(pass_path):
+        raise HTTPException(status_code=404, detail="QR Pass not found")
+    return FileResponse(
+        path=pass_path,
+        media_type="image/png",
+        filename=f"{reg_id}_QR_Pass.png",
+    )
